@@ -1,0 +1,211 @@
+﻿// WC_01.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
+//
+
+#include "pch.h"
+#include <iostream>
+#include <stdio.h>
+
+void C_count(char filepath[]);
+void W_count(char filepath[]);
+int L_count(char filepath[]);
+void A_count(char filepath[]);
+int main()
+{
+	char filepath[20];
+	printf("请输入一个文件路径：\n");
+	scanf("%s",filepath);                    //获取目标文件路径
+	int o;
+	int s = 1;
+	while (s)                                //用户菜单
+	{
+		printf("1：查看文件字符数目\n2：查看文件单词数目\n3：查看文件行数\n4：查看更复杂数据\n");
+		printf("0：退出菜单\n");
+		scanf("%d", &o);
+		switch (o)
+		{
+		case 1:
+			C_count(filepath);
+			break;
+		case 2:
+			W_count(filepath);
+			break;
+		case 3:
+			printf("line number:%d.\n", L_count(filepath));
+			break;
+		case 4:
+			A_count;
+			break;
+		case 0:
+			s = 0;
+			printf("退出成功\n");
+			break;
+		default:
+			printf("请输入正确数字！\n");
+			break;
+		}
+	}
+	return 0;
+}
+
+//字符统计函数
+void C_count(char filepath[])  
+{
+	FILE *fp;
+	int c = 0;
+	char ch;
+	if ((fp = fopen(filepath, "r")) == NULL)
+	{
+		puts("file open fail.");
+		exit(0);
+	}
+	ch = fgetc(fp);
+	while (ch != EOF)
+	{
+		if ((ch == ' ') || (ch == '\n'))
+			ch = fgetc(fp);
+		else
+		{
+			c++;
+			ch = fgetc(fp);
+		}
+	}
+	printf("char number:%d.\n", c);
+	fclose(fp);
+
+}
+
+//词统计函数
+void W_count(char filepath[])
+{
+	FILE *fp;
+	int c = 0;
+	char ch;
+	if ((fp = fopen(filepath, "r")) == NULL)
+	{
+		puts("file open fail.");
+		exit(0);
+	}
+	ch = fgetc(fp);
+	while (ch != EOF)
+	{
+		if ((ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || (ch == '_') || (ch >= 48 && ch <= 57))
+		{
+			while ((ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || (ch == '_') || (ch >= 48 && ch <= 57))
+			{
+				ch = fgetc(fp);
+			}
+			c++;
+			ch = fgetc(fp);
+		}
+		else
+		{
+			ch = fgetc(fp);
+		}
+	}
+	printf("word number:%d.\n", c);
+	fclose(fp);
+}
+
+//行统计函数
+int L_count(char filepath[])
+{
+	FILE *fp;
+	int c = 1;
+	char ch;
+	if ((fp = fopen(filepath, "r")) == NULL)
+	{
+		puts("file open fail.");
+		exit(0);
+	}
+	ch = fgetc(fp);
+	while (ch != EOF)
+	{
+		if ((ch == '\n') || (ch == '\r'))
+		{
+			c++;
+			ch = fgetc(fp);
+		}
+		else
+		{
+			ch = fgetc(fp);
+		}
+	}
+	//printf("line number:%d.\n", c);
+	fclose(fp);
+	return c;
+}
+
+//更复杂数据统计函数
+void A_count(char filepath[])
+{
+	FILE *fp;
+	int h_char = 0, h_sign = 0;           //每行中的字符和符号数
+	int c1 = 0, c2 = 0, c3 = 0;           //c1:空行数  c2:代码行数 c3:注释行数
+	char ch;
+	if ((fp = fopen(filepath, "r")) == NULL)
+	{
+		puts("file open fail.");
+		exit(0);
+	}
+	ch = fgetc(fp);
+	while (ch != EOF)
+	{
+
+		if (ch == '\n')                               //判断空行
+		{
+			if ((h_char == 0) && (h_sign <= 1))        
+			{
+				c1++;
+				h_char = 0;
+				h_sign = 0;
+				ch = fgetc(fp);
+			}
+			else
+			{
+				h_char = 0;
+				h_sign = 0;
+				ch = fgetc(fp);
+			}
+		}
+		else if (ch == '//')                          //判断注释行
+		{
+			if ((h_char <= 1) && (h_sign <= 1))        
+			{
+				c3++;
+				h_char++;
+				ch = fgetc(fp);
+			}
+			else
+			{
+				h_char++;
+				ch = fgetc(fp);
+			}
+		}
+		else if ((ch == '{') || (ch == '}'))
+		{
+			h_sign++;
+			ch = fgetc(fp);
+		}
+		else if (ch == ' ')
+			ch = fgetc(fp);
+		else
+		{
+			h_char++;
+			ch = fgetc(fp);
+		}
+		c2 = L_count(filepath) - c1 - c3;
+		fclose(fp);
+		printf("空行：%d\n代码行：%d\n注释行：%d\n", c1, c2, c3);
+	}
+}
+
+// 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
+// 调试程序: F5 或调试 >“开始调试”菜单
+
+// 入门提示: 
+//   1. 使用解决方案资源管理器窗口添加/管理文件
+//   2. 使用团队资源管理器窗口连接到源代码管理
+//   3. 使用输出窗口查看生成输出和其他消息
+//   4. 使用错误列表窗口查看错误
+//   5. 转到“项目”>“添加新项”以创建新的代码文件，或转到“项目”>“添加现有项”以将现有代码文件添加到项目
+//   6. 将来，若要再次打开此项目，请转到“文件”>“打开”>“项目”并选择 .sln 文件
